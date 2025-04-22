@@ -1,6 +1,7 @@
 package id.my.hendisantika.twofaemailjwt.utility;
 
 import id.my.hendisantika.twofaemailjwt.config.jwt.JwtConfigurationProperties;
+import id.my.hendisantika.twofaemailjwt.entity.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -11,7 +12,10 @@ import org.springframework.stereotype.Component;
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
 /**
@@ -66,5 +70,14 @@ public class JwtUtils {
 
     public Boolean isTokenExpired(final String token) {
         return extractExpiration(token).before(new Date());
+    }
+
+    public String generateAccessToken(final User user) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("account_creation_timestamp", user.getCreatedAt().toString());
+        claims.put("user_id", user.getId());
+        claims.put("email_id", user.getEmailId());
+        claims.put("email_verified", user.isEmailVerified());
+        return createToken(claims, user.getEmailId(), TimeUnit.HOURS.toMillis(1));
     }
 }
