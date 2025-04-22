@@ -1,5 +1,6 @@
 package id.my.hendisantika.twofaemailjwt.controller;
 
+import id.my.hendisantika.twofaemailjwt.dto.LoginRequestDto;
 import id.my.hendisantika.twofaemailjwt.dto.SignupRequestDto;
 import id.my.hendisantika.twofaemailjwt.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -37,5 +38,13 @@ public class AuthenticationController {
     public ResponseEntity<?> userAccountCreationHandler(
             @RequestBody(required = true) final SignupRequestDto userAccountCreationRequestDto) {
         return userService.createAccount(userAccountCreationRequestDto);
+    }
+
+    @PostMapping(value = "/login", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseStatus(value = HttpStatus.OK)
+    @Operation(summary = "Endpoint to authenticate users credentials")
+    public ResponseEntity<?> userLoginHandler(
+            @RequestBody(required = true) final LoginRequestDto userLoginRequestDto) {
+        return userService.login(userLoginRequestDto);
     }
 }
