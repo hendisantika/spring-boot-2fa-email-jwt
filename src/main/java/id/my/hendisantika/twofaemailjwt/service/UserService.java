@@ -1,6 +1,7 @@
 package id.my.hendisantika.twofaemailjwt.service;
 
 import com.google.common.cache.LoadingCache;
+import id.my.hendisantika.twofaemailjwt.dto.LoginRequestDto;
 import id.my.hendisantika.twofaemailjwt.dto.SignupRequestDto;
 import id.my.hendisantika.twofaemailjwt.entity.User;
 import id.my.hendisantika.twofaemailjwt.repository.UserRepository;
@@ -50,6 +51,23 @@ public class UserService {
         final var savedUser = userRepository.save(user);
 
         sendOtp(savedUser, "Verify your account");
+        return ResponseEntity.ok(getOtpSendMessage());
+    }
+
+    public ResponseEntity<?> login(final LoginRequestDto userLoginRequestDto) {
+        final User user = userRepository.findByEmailId(userLoginRequestDto.getEmailId())
+                .orElseThrow(
+                        () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid login credentials"));
+
+        if (!passwordEncoder.matches(userLoginRequestDto.getPassword(), user.getPassword())) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid login credentials");
+        }
+
+        if (!user.isActive()) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Account not active");
+        }
+
+        sendOtp(user, "2FA: Request to log in to your account");
         return ResponseEntity.ok(getOtpSendMessage());
     }
 }
