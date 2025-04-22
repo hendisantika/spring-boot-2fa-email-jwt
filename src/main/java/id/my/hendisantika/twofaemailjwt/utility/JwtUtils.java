@@ -85,4 +85,18 @@ public class JwtUtils {
         Map<String, Object> claims = new HashMap<>();
         return createToken(claims, user.getEmailId(), TimeUnit.DAYS.toMillis(15));
     }
+
+    private String createToken(final Map<String, Object> claims, final String subject,
+                               final Long expiration) {
+        String secretKey = jwtConfigurationProperties.getJwt().getSecretKey();
+        SecretKey key = Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
+
+        return Jwts.builder()
+                .setClaims(claims)
+                .setSubject(subject)
+                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setExpiration(new Date(System.currentTimeMillis() + expiration))
+                .signWith(key)
+                .compact();
+    }
 }
