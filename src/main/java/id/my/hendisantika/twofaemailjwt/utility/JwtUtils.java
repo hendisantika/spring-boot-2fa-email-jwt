@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.stereotype.Component;
 
+import java.util.Date;
 import java.util.UUID;
 
 /**
@@ -34,4 +35,7 @@ public class JwtUtils {
         return UUID.fromString((String) extractAllClaims(token).get("user_id"));
     }
 
+    public Date extractExpiration(final String token) {
+        return extractClaim(token, Claims::getExpiration);
+    }
 }
