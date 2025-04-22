@@ -1,12 +1,17 @@
 package id.my.hendisantika.twofaemailjwt.service;
 
 import com.google.common.cache.LoadingCache;
+import id.my.hendisantika.twofaemailjwt.dto.SignupRequestDto;
+import id.my.hendisantika.twofaemailjwt.entity.User;
 import id.my.hendisantika.twofaemailjwt.repository.UserRepository;
 import id.my.hendisantika.twofaemailjwt.utility.JwtUtils;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 /**
  * Created by IntelliJ IDEA.
@@ -30,4 +35,21 @@ public class UserService {
     private final EmailService emailService;
     private final JwtUtils jwtUtils;
 
+    public ResponseEntity<?> createAccount(
+            final SignupRequestDto userAccountCreationRequestDto) {
+        if (userRepository.existsByEmailId(userAccountCreationRequestDto.getEmailId())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "User account already exists for provided email-id");
+        }
+
+        final var user = new User();
+        user.setEmailId(userAccountCreationRequestDto.getEmailId());
+        user.setPassword(passwordEncoder.encode(userAccountCreationRequestDto.getPassword()));
+        user.setEmailVerified(false);
+        user.setActive(true);
+        final var savedUser = userRepository.save(user);
+
+        sendOtp(savedUser, "Verify your account");
+        return ResponseEntity.ok(getOtpSendMessage());
+    }
 }
