@@ -1,6 +1,8 @@
 package id.my.hendisantika.twofaemailjwt.controller;
 
 import id.my.hendisantika.twofaemailjwt.dto.LoginRequestDto;
+import id.my.hendisantika.twofaemailjwt.dto.LoginSuccessDto;
+import id.my.hendisantika.twofaemailjwt.dto.OtpVerificationRequestDto;
 import id.my.hendisantika.twofaemailjwt.dto.SignupRequestDto;
 import id.my.hendisantika.twofaemailjwt.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -46,5 +48,13 @@ public class AuthenticationController {
     public ResponseEntity<?> userLoginHandler(
             @RequestBody(required = true) final LoginRequestDto userLoginRequestDto) {
         return userService.login(userLoginRequestDto);
+    }
+
+    @PostMapping(value = "/verify-otp", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseStatus(value = HttpStatus.OK)
+    @Operation(summary = "verifies OTP and returns JWT corresponding to the user")
+    public ResponseEntity<LoginSuccessDto> otpVerificationHandler(
+            @RequestBody(required = true) final OtpVerificationRequestDto otpVerificationRequestDto) {
+        return userService.verifyOtp(otpVerificationRequestDto);
     }
 }
