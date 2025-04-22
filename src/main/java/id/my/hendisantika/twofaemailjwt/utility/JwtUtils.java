@@ -80,4 +80,9 @@ public class JwtUtils {
         claims.put("email_verified", user.isEmailVerified());
         return createToken(claims, user.getEmailId(), TimeUnit.HOURS.toMillis(1));
     }
+
+    public String generateRefreshToken(final User user) {
+        Map<String, Object> claims = new HashMap<>();
+        return createToken(claims, user.getEmailId(), TimeUnit.DAYS.toMillis(15));
+    }
 }
