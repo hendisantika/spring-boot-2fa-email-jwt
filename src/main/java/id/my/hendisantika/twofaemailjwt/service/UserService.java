@@ -6,6 +6,7 @@ import id.my.hendisantika.twofaemailjwt.dto.LoginRequestDto;
 import id.my.hendisantika.twofaemailjwt.dto.LoginSuccessDto;
 import id.my.hendisantika.twofaemailjwt.dto.OtpVerificationRequestDto;
 import id.my.hendisantika.twofaemailjwt.dto.SignupRequestDto;
+import id.my.hendisantika.twofaemailjwt.dto.TokenRefreshRequestDto;
 import id.my.hendisantika.twofaemailjwt.entity.User;
 import id.my.hendisantika.twofaemailjwt.repository.UserRepository;
 import id.my.hendisantika.twofaemailjwt.utility.JwtUtils;
@@ -150,5 +151,17 @@ public class UserService {
         response.put("message",
                 "OTP sent successfully sent to your registered email-address. verify it using /verify-otp endpoint");
         return response;
+    }
+
+    public ResponseEntity<?> refreshToken(final TokenRefreshRequestDto tokenRefreshRequestDto) {
+        if (jwtUtils.isTokenExpired(tokenRefreshRequestDto.getRefreshToken())) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Refresh token has expired");
+        }
+        final var user = userRepository.findByEmailId(
+                        jwtUtils.extractEmail(tokenRefreshRequestDto.getRefreshToken()))
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
+        return ResponseEntity.ok(
+                LoginSuccessDto.builder().refreshToken(tokenRefreshRequestDto.getRefreshToken())
+                        .accessToken(jwtUtils.generateAccessToken(user)).build());
     }
 }
