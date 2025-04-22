@@ -18,7 +18,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.HashMap;
+import java.util.Random;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -125,5 +127,20 @@ public class UserService {
         response.put("email_id", user.getEmailId());
         response.put("created_at", user.getCreatedAt().toString());
         return ResponseEntity.ok(response);
+    }
+
+    private void sendOtp(final User user, final String subject) {
+        oneTimePasswordCache.invalidate(user.getEmailId());
+
+        final var otp = new Random().ints(1, 100000, 999999).sum();
+        oneTimePasswordCache.put(user.getEmailId(), otp);
+        log.info("OTP sent :: {}", otp);
+
+        CompletableFuture.supplyAsync(() -> {
+            emailService.sendEmail(user.getEmailId(), subject, "OTP: " + otp);
+            return HttpStatus.OK;
+        }).thenAccept(status -> {
+            System.out.println("Email sent successfully with status: " + status);
+        });
     }
 }
