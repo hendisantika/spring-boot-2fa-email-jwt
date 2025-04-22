@@ -17,6 +17,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -109,5 +110,11 @@ public class UserService {
         } else {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
+    }
+
+    public ResponseEntity<?> deleteAccount(final UUID userId) {
+        final var user = userRepository.findById(userId).get();
+        sendOtp(user, "2FA: Confirm account Deletion");
+        return ResponseEntity.ok(getOtpSendMessage());
     }
 }
