@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Date;
 import java.util.UUID;
+import java.util.function.Function;
 
 /**
  * Created by IntelliJ IDEA.
@@ -37,5 +38,10 @@ public class JwtUtils {
 
     public Date extractExpiration(final String token) {
         return extractClaim(token, Claims::getExpiration);
+    }
+
+    public <T> T extractClaim(final String token, final Function<Claims, T> claimsResolver) {
+        final Claims claims = extractAllClaims(token);
+        return claimsResolver.apply(claims);
     }
 }
