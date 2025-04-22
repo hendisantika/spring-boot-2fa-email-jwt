@@ -1,6 +1,7 @@
 package id.my.hendisantika.twofaemailjwt.utility;
 
 import id.my.hendisantika.twofaemailjwt.config.jwt.JwtConfigurationProperties;
+import io.jsonwebtoken.Claims;
 import lombok.AllArgsConstructor;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.stereotype.Component;
@@ -22,4 +23,8 @@ import org.springframework.stereotype.Component;
 public class JwtUtils {
 
     private final JwtConfigurationProperties jwtConfigurationProperties;
+
+    public String extractEmail(final String token) {
+        return extractClaim(token, Claims::getSubject);
+    }
 }
