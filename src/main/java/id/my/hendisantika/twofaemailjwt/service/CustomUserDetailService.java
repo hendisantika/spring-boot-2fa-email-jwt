@@ -1,9 +1,14 @@
 package id.my.hendisantika.twofaemailjwt.service;
 
 import id.my.hendisantika.twofaemailjwt.repository.UserRepository;
+import id.my.hendisantika.twofaemailjwt.utility.SecurityUtils;
 import lombok.AllArgsConstructor;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+
+import java.util.UUID;
 
 /**
  * Created by IntelliJ IDEA.
@@ -21,4 +26,10 @@ import org.springframework.stereotype.Service;
 public class CustomUserDetailService implements UserDetailsService {
 
     private final UserRepository userRepository;
+
+    @Override
+    public UserDetails loadUserByUsername(String userId) throws UsernameNotFoundException {
+        return SecurityUtils.convert(userRepository.findById(UUID.fromString(userId))
+                .orElseThrow(() -> new UsernameNotFoundException("Bad Credentials")));
+    }
 }
