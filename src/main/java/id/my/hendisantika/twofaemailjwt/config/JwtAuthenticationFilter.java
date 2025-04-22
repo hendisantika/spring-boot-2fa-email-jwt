@@ -1,5 +1,6 @@
 package id.my.hendisantika.twofaemailjwt.config;
 
+import id.my.hendisantika.twofaemailjwt.service.CustomUserDetailService;
 import id.my.hendisantika.twofaemailjwt.utility.JwtUtils;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

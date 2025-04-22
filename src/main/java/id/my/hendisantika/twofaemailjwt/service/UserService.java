@@ -8,6 +8,7 @@ import id.my.hendisantika.twofaemailjwt.dto.OtpVerificationRequestDto;
 import id.my.hendisantika.twofaemailjwt.dto.SignupRequestDto;
 import id.my.hendisantika.twofaemailjwt.dto.TokenRefreshRequestDto;
 import id.my.hendisantika.twofaemailjwt.entity.User;
+import id.my.hendisantika.twofaemailjwt.mail.EmailService;
 import id.my.hendisantika.twofaemailjwt.repository.UserRepository;
 import id.my.hendisantika.twofaemailjwt.utility.JwtUtils;
 import lombok.AllArgsConstructor;
