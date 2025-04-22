@@ -2,10 +2,14 @@ package id.my.hendisantika.twofaemailjwt.utility;
 
 import id.my.hendisantika.twofaemailjwt.config.jwt.JwtConfigurationProperties;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
 import lombok.AllArgsConstructor;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.stereotype.Component;
 
+import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.UUID;
 import java.util.function.Function;
@@ -43,5 +47,20 @@ public class JwtUtils {
     public <T> T extractClaim(final String token, final Function<Claims, T> claimsResolver) {
         final Claims claims = extractAllClaims(token);
         return claimsResolver.apply(claims);
+    }
+
+    private Claims extractAllClaims(String token) {
+        String secretKey = jwtConfigurationProperties.getJwt().getSecretKey();
+        SecretKey key = Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
+
+        if (token.startsWith("Bearer ")) {
+            token = token.substring(7);
+        }
+
+        return Jwts.parser()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
     }
 }
