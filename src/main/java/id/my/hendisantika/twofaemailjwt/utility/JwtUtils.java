@@ -6,6 +6,8 @@ import lombok.AllArgsConstructor;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.stereotype.Component;
 
+import java.util.UUID;
+
 /**
  * Created by IntelliJ IDEA.
  * Project : spring-boot-2fa-email-jwt
@@ -27,4 +29,9 @@ public class JwtUtils {
     public String extractEmail(final String token) {
         return extractClaim(token, Claims::getSubject);
     }
+
+    public UUID extractUserId(final String token) {
+        return UUID.fromString((String) extractAllClaims(token).get("user_id"));
+    }
+
 }
