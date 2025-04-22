@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -142,5 +143,12 @@ public class UserService {
         }).thenAccept(status -> {
             System.out.println("Email sent successfully with status: " + status);
         });
+    }
+
+    private Map<String, String> getOtpSendMessage() {
+        final var response = new HashMap<String, String>();
+        response.put("message",
+                "OTP sent successfully sent to your registered email-address. verify it using /verify-otp endpoint");
+        return response;
     }
 }
