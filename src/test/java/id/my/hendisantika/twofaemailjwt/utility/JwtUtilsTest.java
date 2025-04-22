@@ -2,10 +2,17 @@ package id.my.hendisantika.twofaemailjwt.utility;
 
 import id.my.hendisantika.twofaemailjwt.config.jwt.JwtConfigurationProperties;
 import id.my.hendisantika.twofaemailjwt.entity.User;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.UUID;
+
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class JwtUtilsTest {
@@ -24,5 +31,17 @@ public class JwtUtilsTest {
 
     private User testUser;
 
+    @BeforeEach
+    void setUp() {
+        when(jwtConfigurationProperties.getJwt()).thenReturn(jwt);
+        when(jwt.getSecretKey()).thenReturn(SECRET_KEY);
 
+        testUser = new User();
+        testUser.setId(UUID.randomUUID());
+        testUser.setEmailId(TEST_EMAIL);
+        testUser.setPassword("password");
+        testUser.setEmailVerified(true);
+        testUser.setActive(true);
+        testUser.setCreatedAt(LocalDateTime.now(ZoneId.of("+07:00")));
+    }
 }
