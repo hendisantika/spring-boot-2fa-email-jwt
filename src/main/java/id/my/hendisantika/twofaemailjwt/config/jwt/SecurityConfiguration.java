@@ -1,6 +1,7 @@
 package id.my.hendisantika.twofaemailjwt.config.jwt;
 
 import id.my.hendisantika.twofaemailjwt.config.JwtAuthenticationFilter;
+import id.my.hendisantika.twofaemailjwt.constant.ApiPathExclusion;
 import id.my.hendisantika.twofaemailjwt.service.CustomUserDetailService;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
