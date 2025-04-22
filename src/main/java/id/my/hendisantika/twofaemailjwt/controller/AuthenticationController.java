@@ -4,6 +4,7 @@ import id.my.hendisantika.twofaemailjwt.dto.LoginRequestDto;
 import id.my.hendisantika.twofaemailjwt.dto.LoginSuccessDto;
 import id.my.hendisantika.twofaemailjwt.dto.OtpVerificationRequestDto;
 import id.my.hendisantika.twofaemailjwt.dto.SignupRequestDto;
+import id.my.hendisantika.twofaemailjwt.dto.TokenRefreshRequestDto;
 import id.my.hendisantika.twofaemailjwt.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.AllArgsConstructor;
@@ -12,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
@@ -56,5 +58,13 @@ public class AuthenticationController {
     public ResponseEntity<LoginSuccessDto> otpVerificationHandler(
             @RequestBody(required = true) final OtpVerificationRequestDto otpVerificationRequestDto) {
         return userService.verifyOtp(otpVerificationRequestDto);
+    }
+
+    @PutMapping(value = "/refresh-token", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseStatus(value = HttpStatus.OK)
+    @Operation(summary = "Returns new access_token")
+    public ResponseEntity<?> tokenRefresherHandler(
+            @RequestBody(required = true) final TokenRefreshRequestDto tokenRefreshRequestDto) {
+        return userService.refreshToken(tokenRefreshRequestDto);
     }
 }
