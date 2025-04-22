@@ -40,5 +40,16 @@ public class OtpCacheBean {
                 });
     }
 
-
+    @Bean
+    public LoadingCache<String, Integer> loadingCache() {
+        final var expirationMinutes = oneTimePasswordConfigurationProperties.getOtp()
+                .getExpirationMinutes();
+        return CacheBuilder.newBuilder()
+                .expireAfterWrite(expirationMinutes, TimeUnit.MINUTES)
+                .build(new CacheLoader<>() {
+                    public Integer load(String key) {
+                        return 0;
+                    }
+                });
+    }
 }
