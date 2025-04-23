@@ -1,6 +1,7 @@
 package id.my.hendisantika.twofaemailjwt.service;
 
 import com.google.common.cache.LoadingCache;
+import id.my.hendisantika.twofaemailjwt.dto.LoginRequestDto;
 import id.my.hendisantika.twofaemailjwt.dto.SignupRequestDto;
 import id.my.hendisantika.twofaemailjwt.entity.User;
 import id.my.hendisantika.twofaemailjwt.mail.EmailService;
@@ -22,6 +23,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -135,5 +137,30 @@ public class UserServiceTest {
         verify(oneTimePasswordCache, never()).invalidate(anyString());
         verify(oneTimePasswordCache, never()).put(anyString(), anyInt());
         verify(emailService, never()).sendEmail(anyString(), anyString(), anyString());
+    }
+
+    @Test
+    void login_WhenCredentialsAreValid_ShouldSendOtp() {
+        // Arrange
+        LoginRequestDto requestDto = LoginRequestDto.builder()
+                .emailId(TEST_EMAIL)
+                .password(TEST_PASSWORD)
+                .build();
+
+        when(userRepository.findByEmailId(TEST_EMAIL)).thenReturn(Optional.of(testUser));
+        when(passwordEncoder.matches(TEST_PASSWORD, testUser.getPassword())).thenReturn(true);
+
+        // Act
+        ResponseEntity<?> response = userService.login(requestDto);
+
+        // Assert
+        verify(oneTimePasswordCache).invalidate(TEST_EMAIL);
+        verify(oneTimePasswordCache).put(eq(TEST_EMAIL), anyInt());
+        verify(emailService).sendEmail(eq(TEST_EMAIL), eq("2FA: Request to log in to your account"), anyString());
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertInstanceOf(Map.class, response.getBody());
+        Map<String, String> responseBody = (Map<String, String>) response.getBody();
+        assertTrue(responseBody.containsKey("message"));
     }
 }
