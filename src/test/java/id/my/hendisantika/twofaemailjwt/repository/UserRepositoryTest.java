@@ -10,6 +10,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DataJpaTest
@@ -66,5 +67,24 @@ public class UserRepositoryTest {
 
         // Assert
         assertFalse(foundUser.isPresent());
+    }
+
+    @Test
+    void save_ShouldPersistUser() {
+        // Arrange
+        User user = createTestUser("test@example.com");
+
+        // Act
+        User savedUser = userRepository.save(user);
+
+        // Assert
+        assertNotNull(savedUser.getId());
+
+        User retrievedUser = entityManager.find(User.class, savedUser.getId());
+        assertNotNull(retrievedUser);
+        assertEquals("test@example.com", retrievedUser.getEmailId());
+        assertEquals(user.getPassword(), retrievedUser.getPassword());
+        assertEquals(user.isEmailVerified(), retrievedUser.isEmailVerified());
+        assertEquals(user.isActive(), retrievedUser.isActive());
     }
 }
