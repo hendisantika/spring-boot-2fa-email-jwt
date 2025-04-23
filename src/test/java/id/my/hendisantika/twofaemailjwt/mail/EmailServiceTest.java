@@ -12,6 +12,7 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -55,4 +56,14 @@ public class EmailServiceTest {
         assertEquals(TEST_SUBJECT, capturedMessage.getSubject());
         assertEquals(TEST_MESSAGE, capturedMessage.getText());
     }
+
+    @Test
+    void sendEmail_WithNullValues_ShouldStillAttemptToSendEmail() {
+        // Act
+        emailService.sendEmail(null, null, null);
+
+        // Assert
+        verify(javaMailSender, times(1)).send(any(SimpleMailMessage.class));
+    }
+
 }
