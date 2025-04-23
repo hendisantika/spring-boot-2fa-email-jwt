@@ -3,6 +3,7 @@ package id.my.hendisantika.twofaemailjwt.utility;
 import id.my.hendisantika.twofaemailjwt.config.jwt.JwtConfigurationProperties;
 import id.my.hendisantika.twofaemailjwt.entity.User;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import lombok.AllArgsConstructor;
@@ -70,7 +71,11 @@ public class JwtUtils {
     }
 
     public Boolean isTokenExpired(final String token) {
-        return extractExpiration(token).before(new Date());
+        try {
+            return extractExpiration(token).before(new Date());
+        } catch (ExpiredJwtException e) {
+            return true;
+        }
     }
 
     public String generateAccessToken(final User user) {
@@ -102,7 +107,11 @@ public class JwtUtils {
     }
 
     public Boolean validateToken(final String token, final UserDetails userDetails) {
-        final String username = extractEmail(token);
-        return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+        try {
+            final String username = extractEmail(token);
+            return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+        } catch (ExpiredJwtException e) {
+            return false;
+        }
     }
 }

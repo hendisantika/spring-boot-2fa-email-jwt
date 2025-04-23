@@ -175,7 +175,7 @@ public class JwtUtilsTest {
                 .compact();
 
         UserDetails userDetails = mock(UserDetails.class);
-        when(userDetails.getUsername()).thenReturn(TEST_EMAIL);
+        // Removed unnecessary stubbing
 
         // Act
         boolean isValid = jwtUtils.validateToken(token, userDetails);
