@@ -83,4 +83,16 @@ public class JwtUtilsTest {
         // Assert
         assertEquals(TEST_EMAIL, email);
     }
+
+    @Test
+    void extractUserId_ShouldReturnCorrectUserId() {
+        // Arrange
+        String token = jwtUtils.generateAccessToken(testUser);
+
+        // Act
+        UUID userId = jwtUtils.extractUserId(token);
+
+        // Assert
+        assertEquals(testUser.getId(), userId);
+    }
 }
