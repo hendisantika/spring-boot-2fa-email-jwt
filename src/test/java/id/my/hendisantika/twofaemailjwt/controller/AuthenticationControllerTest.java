@@ -1,6 +1,9 @@
 package id.my.hendisantika.twofaemailjwt.controller;
 
+import id.my.hendisantika.twofaemailjwt.constant.OtpContext;
 import id.my.hendisantika.twofaemailjwt.dto.LoginRequestDto;
+import id.my.hendisantika.twofaemailjwt.dto.LoginSuccessDto;
+import id.my.hendisantika.twofaemailjwt.dto.OtpVerificationRequestDto;
 import id.my.hendisantika.twofaemailjwt.dto.SignupRequestDto;
 import id.my.hendisantika.twofaemailjwt.service.UserService;
 import org.junit.jupiter.api.Test;
@@ -73,6 +76,33 @@ public class AuthenticationControllerTest {
 
         // Assert
         verify(userService).login(requestDto);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertSame(expectedResponse.getBody(), response.getBody());
+    }
+
+    @Test
+    void otpVerificationHandler_ShouldDelegateToUserService() {
+        // Arrange
+        OtpVerificationRequestDto requestDto = OtpVerificationRequestDto.builder()
+                .emailId("test@example.com")
+                .oneTimePassword(123456)
+                .context(OtpContext.LOGIN)
+                .build();
+
+        LoginSuccessDto successDto = LoginSuccessDto.builder()
+                .accessToken("access_token")
+                .refreshToken("refresh_token")
+                .build();
+        ResponseEntity<LoginSuccessDto> expectedResponse = ResponseEntity.ok(successDto);
+
+        // Use unchecked cast to avoid type inference issues
+        when(userService.verifyOtp(any(OtpVerificationRequestDto.class))).thenReturn(expectedResponse);
+
+        // Act
+        ResponseEntity<LoginSuccessDto> response = authenticationController.otpVerificationHandler(requestDto);
+
+        // Assert
+        verify(userService).verifyOtp(requestDto);
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertSame(expectedResponse.getBody(), response.getBody());
     }
