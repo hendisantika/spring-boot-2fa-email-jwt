@@ -2,6 +2,8 @@ package id.my.hendisantika.twofaemailjwt.utility;
 
 import id.my.hendisantika.twofaemailjwt.config.jwt.JwtConfigurationProperties;
 import id.my.hendisantika.twofaemailjwt.entity.User;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -9,13 +11,18 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.Date;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -106,5 +113,23 @@ public class JwtUtilsTest {
 
         // Assert
         assertFalse(isExpired);
+    }
+
+    @Test
+    void isTokenExpired_ShouldReturnTrueForExpiredToken() {
+        // Arrange
+        SecretKey key = Keys.hmacShaKeyFor(SECRET_KEY.getBytes(StandardCharsets.UTF_8));
+        String token = Jwts.builder()
+                .setSubject(TEST_EMAIL)
+                .setIssuedAt(new Date(System.currentTimeMillis() - TimeUnit.HOURS.toMillis(2)))
+                .setExpiration(new Date(System.currentTimeMillis() - TimeUnit.HOURS.toMillis(1)))
+                .signWith(key)
+                .compact();
+
+        // Act
+        boolean isExpired = jwtUtils.isTokenExpired(token);
+
+        // Assert
+        assertTrue(isExpired);
     }
 }
