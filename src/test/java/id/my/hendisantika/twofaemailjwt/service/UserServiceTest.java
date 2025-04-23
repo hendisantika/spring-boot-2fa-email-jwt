@@ -315,4 +315,22 @@ public class UserServiceTest {
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNull(response.getBody());
     }
+
+    @Test
+    void verifyOtp_WhenUserDoesNotExist_ShouldThrowException() {
+        // Arrange
+        OtpVerificationRequestDto requestDto = OtpVerificationRequestDto.builder()
+                .emailId(TEST_EMAIL)
+                .oneTimePassword(TEST_OTP)
+                .context(OtpContext.LOGIN)
+                .build();
+
+        when(userRepository.findByEmailId(TEST_EMAIL)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+                () -> userService.verifyOtp(requestDto));
+        assertEquals(HttpStatus.UNAUTHORIZED, exception.getStatusCode());
+        assertTrue(exception.getReason().contains("Invalid email-id"));
+    }
 }
