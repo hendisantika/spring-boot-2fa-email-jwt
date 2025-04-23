@@ -263,4 +263,30 @@ public class UserServiceTest {
         assertEquals(TEST_ACCESS_TOKEN, response.getBody().getAccessToken());
         assertEquals(TEST_REFRESH_TOKEN, response.getBody().getRefreshToken());
     }
+
+    @Test
+    void verifyOtp_ForLogin_WhenOtpIsValid_ShouldReturnTokens() throws ExecutionException {
+        // Arrange
+        OtpVerificationRequestDto requestDto = OtpVerificationRequestDto.builder()
+                .emailId(TEST_EMAIL)
+                .oneTimePassword(TEST_OTP)
+                .context(OtpContext.LOGIN)
+                .build();
+
+        when(userRepository.findByEmailId(TEST_EMAIL)).thenReturn(Optional.of(testUser));
+        when(oneTimePasswordCache.get(TEST_EMAIL)).thenReturn(TEST_OTP);
+        when(jwtUtils.generateAccessToken(any(User.class))).thenReturn(TEST_ACCESS_TOKEN);
+        when(jwtUtils.generateRefreshToken(any(User.class))).thenReturn(TEST_REFRESH_TOKEN);
+
+        // Act
+        ResponseEntity<LoginSuccessDto> response = userService.verifyOtp(requestDto);
+
+        // Assert
+        verify(userRepository, never()).save(any(User.class));
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals(TEST_ACCESS_TOKEN, response.getBody().getAccessToken());
+        assertEquals(TEST_REFRESH_TOKEN, response.getBody().getRefreshToken());
+    }
 }
