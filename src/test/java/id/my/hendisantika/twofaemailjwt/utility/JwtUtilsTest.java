@@ -3,6 +3,7 @@ package id.my.hendisantika.twofaemailjwt.utility;
 import id.my.hendisantika.twofaemailjwt.config.jwt.JwtConfigurationProperties;
 import id.my.hendisantika.twofaemailjwt.entity.User;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -12,6 +13,9 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.UUID;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -43,5 +47,17 @@ public class JwtUtilsTest {
         testUser.setEmailVerified(true);
         testUser.setActive(true);
         testUser.setCreatedAt(LocalDateTime.now(ZoneId.of("+07:00")));
+    }
+
+    @Test
+    void generateAccessToken_ShouldCreateValidToken() {
+        // Act
+        String token = jwtUtils.generateAccessToken(testUser);
+
+        // Assert
+        assertNotNull(token);
+        assertEquals(TEST_EMAIL, jwtUtils.extractEmail(token));
+        assertEquals(testUser.getId().toString(), jwtUtils.extractClaim(token, claims -> claims.get("user_id").toString()));
+        assertFalse(jwtUtils.isTokenExpired(token));
     }
 }
