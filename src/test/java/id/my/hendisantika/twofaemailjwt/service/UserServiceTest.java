@@ -1,22 +1,38 @@
 package id.my.hendisantika.twofaemailjwt.service;
 
 import com.google.common.cache.LoadingCache;
+import id.my.hendisantika.twofaemailjwt.dto.SignupRequestDto;
 import id.my.hendisantika.twofaemailjwt.entity.User;
 import id.my.hendisantika.twofaemailjwt.mail.EmailService;
 import id.my.hendisantika.twofaemailjwt.repository.UserRepository;
 import id.my.hendisantika.twofaemailjwt.utility.JwtUtils;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.Map;
 import java.util.UUID;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class UserServiceTest {
@@ -61,5 +77,38 @@ public class UserServiceTest {
         testUser.setEmailVerified(true);
         testUser.setActive(true);
         testUser.setCreatedAt(LocalDateTime.now(ZoneId.of("+07:00")));
+    }
+
+    @Test
+    void createAccount_WhenEmailDoesNotExist_ShouldCreateUserAndSendOtp() {
+        // Arrange
+        SignupRequestDto requestDto = SignupRequestDto.builder()
+                .emailId(TEST_EMAIL)
+                .password(TEST_PASSWORD)
+                .build();
+
+        when(userRepository.existsByEmailId(TEST_EMAIL)).thenReturn(false);
+        when(passwordEncoder.encode(TEST_PASSWORD)).thenReturn("encoded_password");
+        when(userRepository.save(any(User.class))).thenReturn(testUser);
+
+        // Act
+        ResponseEntity<?> response = userService.createAccount(requestDto);
+
+        // Assert
+        verify(userRepository).save(userCaptor.capture());
+        User savedUser = userCaptor.getValue();
+        assertEquals(TEST_EMAIL, savedUser.getEmailId());
+        assertEquals("encoded_password", savedUser.getPassword());
+        assertFalse(savedUser.isEmailVerified());
+        assertTrue(savedUser.isActive());
+
+        verify(oneTimePasswordCache).invalidate(TEST_EMAIL);
+        verify(oneTimePasswordCache).put(eq(TEST_EMAIL), anyInt());
+        verify(emailService).sendEmail(eq(TEST_EMAIL), eq("Verify your account"), anyString());
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertInstanceOf(Map.class, response.getBody());
+        Map<String, String> responseBody = (Map<String, String>) response.getBody();
+        assertTrue(responseBody.containsKey("message"));
     }
 }
