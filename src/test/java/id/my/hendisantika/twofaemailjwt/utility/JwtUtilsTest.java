@@ -71,4 +71,16 @@ public class JwtUtilsTest {
         assertEquals(TEST_EMAIL, jwtUtils.extractEmail(token));
         assertFalse(jwtUtils.isTokenExpired(token));
     }
+
+    @Test
+    void extractEmail_ShouldReturnCorrectEmail() {
+        // Arrange
+        String token = jwtUtils.generateAccessToken(testUser);
+
+        // Act
+        String email = jwtUtils.extractEmail(token);
+
+        // Assert
+        assertEquals(TEST_EMAIL, email);
+    }
 }
