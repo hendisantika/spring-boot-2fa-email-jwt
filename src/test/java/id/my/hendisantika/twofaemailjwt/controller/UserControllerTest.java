@@ -54,4 +54,31 @@ public class UserControllerTest {
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertSame(expectedResponse.getBody(), response.getBody());
     }
+
+    @Test
+    void loggedInUserDetailsRetrievalHandler_ShouldDelegateToUserService() {
+        // Arrange
+        String authHeader = "Bearer jwt_token";
+        UUID userId = UUID.randomUUID();
+
+        Map<String, String> responseBody = new HashMap<>();
+        responseBody.put("email_id", "test@example.com");
+        responseBody.put("created_at", "2023-01-01T00:00:00");
+        ResponseEntity<Map<String, String>> expectedResponse = ResponseEntity.ok(responseBody);
+
+        when(jwtUtils.extractUserId(authHeader)).thenReturn(userId);
+        // Use unchecked cast to avoid type inference issues
+        when(userService.getDetails(userId)).thenReturn((ResponseEntity) expectedResponse);
+
+        // Act
+        ResponseEntity<?> response = userController.loggedInUserDetailsRetrievalHandler(authHeader);
+
+        // Assert
+        verify(jwtUtils).extractUserId(authHeader);
+        verify(userService).getDetails(userId);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertSame(expectedResponse.getBody(), response.getBody());
+    }
+
+
 }
