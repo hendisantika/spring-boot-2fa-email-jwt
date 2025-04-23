@@ -27,6 +27,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
@@ -442,5 +443,21 @@ public class UserServiceTest {
         Map<String, String> responseBody = (Map<String, String>) response.getBody();
         assertEquals(TEST_EMAIL, responseBody.get("email_id"));
         assertNotNull(responseBody.get("created_at"));
+    }
+
+    @Test
+    void deleteAccount_WhenUserDoesNotExist_ShouldThrowException() {
+        // Arrange
+        UUID nonExistentUserId = UUID.randomUUID();
+        when(userRepository.findById(nonExistentUserId)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        NoSuchElementException exception = assertThrows(NoSuchElementException.class,
+                () -> userService.deleteAccount(nonExistentUserId));
+
+        // Verify that no OTP was sent
+        verify(oneTimePasswordCache, never()).invalidate(anyString());
+        verify(oneTimePasswordCache, never()).put(anyString(), anyInt());
+        verify(emailService, never()).sendEmail(anyString(), anyString(), anyString());
     }
 }
