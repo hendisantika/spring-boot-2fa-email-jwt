@@ -5,6 +5,7 @@ import id.my.hendisantika.twofaemailjwt.dto.LoginRequestDto;
 import id.my.hendisantika.twofaemailjwt.dto.LoginSuccessDto;
 import id.my.hendisantika.twofaemailjwt.dto.OtpVerificationRequestDto;
 import id.my.hendisantika.twofaemailjwt.dto.SignupRequestDto;
+import id.my.hendisantika.twofaemailjwt.dto.TokenRefreshRequestDto;
 import id.my.hendisantika.twofaemailjwt.service.UserService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -106,4 +107,30 @@ public class AuthenticationControllerTest {
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertSame(expectedResponse.getBody(), response.getBody());
     }
+
+    @Test
+    void tokenRefresherHandler_ShouldDelegateToUserService() {
+        // Arrange
+        TokenRefreshRequestDto requestDto = TokenRefreshRequestDto.builder()
+                .refreshToken("refresh_token")
+                .build();
+
+        LoginSuccessDto successDto = LoginSuccessDto.builder()
+                .accessToken("new_access_token")
+                .refreshToken("refresh_token")
+                .build();
+        ResponseEntity<LoginSuccessDto> expectedResponse = ResponseEntity.ok(successDto);
+
+        // Use unchecked cast to avoid type inference issues
+        when(userService.refreshToken(any(TokenRefreshRequestDto.class))).thenReturn((ResponseEntity) expectedResponse);
+
+        // Act
+        ResponseEntity<?> response = authenticationController.tokenRefresherHandler(requestDto);
+
+        // Assert
+        verify(userService).refreshToken(requestDto);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertSame(expectedResponse.getBody(), response.getBody());
+    }
+
 }
