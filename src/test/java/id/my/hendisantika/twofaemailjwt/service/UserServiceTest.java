@@ -1,7 +1,10 @@
 package id.my.hendisantika.twofaemailjwt.service;
 
 import com.google.common.cache.LoadingCache;
+import id.my.hendisantika.twofaemailjwt.constant.OtpContext;
 import id.my.hendisantika.twofaemailjwt.dto.LoginRequestDto;
+import id.my.hendisantika.twofaemailjwt.dto.LoginSuccessDto;
+import id.my.hendisantika.twofaemailjwt.dto.OtpVerificationRequestDto;
 import id.my.hendisantika.twofaemailjwt.dto.SignupRequestDto;
 import id.my.hendisantika.twofaemailjwt.entity.User;
 import id.my.hendisantika.twofaemailjwt.mail.EmailService;
@@ -25,10 +28,12 @@ import java.time.ZoneId;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -228,5 +233,34 @@ public class UserServiceTest {
         verify(oneTimePasswordCache, never()).invalidate(anyString());
         verify(oneTimePasswordCache, never()).put(anyString(), anyInt());
         verify(emailService, never()).sendEmail(anyString(), anyString(), anyString());
+    }
+
+    @Test
+    void verifyOtp_ForSignUp_WhenOtpIsValid_ShouldVerifyEmailAndReturnTokens() throws ExecutionException {
+        // Arrange
+        OtpVerificationRequestDto requestDto = OtpVerificationRequestDto.builder()
+                .emailId(TEST_EMAIL)
+                .oneTimePassword(TEST_OTP)
+                .context(OtpContext.SIGN_UP)
+                .build();
+
+        when(userRepository.findByEmailId(TEST_EMAIL)).thenReturn(Optional.of(testUser));
+        when(oneTimePasswordCache.get(TEST_EMAIL)).thenReturn(TEST_OTP);
+        when(jwtUtils.generateAccessToken(any(User.class))).thenReturn(TEST_ACCESS_TOKEN);
+        when(jwtUtils.generateRefreshToken(any(User.class))).thenReturn(TEST_REFRESH_TOKEN);
+        when(userRepository.save(any(User.class))).thenReturn(testUser);
+
+        // Act
+        ResponseEntity<LoginSuccessDto> response = userService.verifyOtp(requestDto);
+
+        // Assert
+        verify(userRepository).save(userCaptor.capture());
+        User savedUser = userCaptor.getValue();
+        assertTrue(savedUser.isEmailVerified());
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals(TEST_ACCESS_TOKEN, response.getBody().getAccessToken());
+        assertEquals(TEST_REFRESH_TOKEN, response.getBody().getRefreshToken());
     }
 }
