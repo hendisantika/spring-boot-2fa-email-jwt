@@ -1,5 +1,6 @@
 package id.my.hendisantika.twofaemailjwt.mail;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -8,6 +9,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class EmailServiceTest {
@@ -29,5 +32,8 @@ public class EmailServiceTest {
     @Captor
     private ArgumentCaptor<SimpleMailMessage> mailMessageCaptor;
 
-
+    @BeforeEach
+    void setUp() {
+        when(emailConfigurationProperties.getUsername()).thenReturn(SENDER_EMAIL);
+    }
 }
