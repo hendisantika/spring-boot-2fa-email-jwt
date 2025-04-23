@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -87,4 +89,15 @@ public class UserRepositoryTest {
         assertEquals(user.isEmailVerified(), retrievedUser.isEmailVerified());
         assertEquals(user.isActive(), retrievedUser.isActive());
     }
+
+    private User createTestUser(String email) {
+        User user = new User();
+        user.setEmailId(email);
+        user.setPassword("password");
+        user.setEmailVerified(true);
+        user.setActive(true);
+        user.setCreatedAt(LocalDateTime.now(ZoneId.of("+07:00")));
+        return user;
+    }
+
 }
