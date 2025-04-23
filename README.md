@@ -124,6 +124,66 @@ id.my.hendisantika.twofaemailjwt.config.jwt.secret-key=your-secret-key
 id.my.hendisantika.twofaemailjwt.otp.expiration-minutes=5
 ```
 
+# API Testing
+
+This directory contains files for testing the API endpoints of the Spring Boot 2FA Email JWT application.
+
+## HTTP File
+
+The `http/api-tests.http` file contains HTTP requests for all API endpoints. This file can be used with tools like
+IntelliJ's HTTP Client or VS Code's REST Client extension.
+
+To use this file:
+
+1. Open it in IntelliJ IDEA or VS Code with the appropriate extension
+2. Click the "Run" button next to each request to execute it
+3. For requests that require authentication, replace `your-access-token-here` with an actual token obtained from the OTP
+   verification response
+4. For the refresh token request, replace `your-refresh-token-here` with an actual refresh token
+
+## Curl Script
+
+The `curl/api-tests.sh` script contains curl commands for all API endpoints. This script can be run from the command
+line.
+
+To use this script:
+
+1. Make sure it's executable: `chmod +x src/test/curl/api-tests.sh`
+2. Run it: `./src/test/curl/api-tests.sh`
+3. For requests that require authentication, edit the script to replace `your-access-token-here` with an actual token
+4. For the refresh token request, edit the script to replace `your-refresh-token-here` with an actual refresh token
+
+## API Endpoints
+
+The following API endpoints are available:
+
+### Authentication
+
+- `POST /sign-up` - Creates a user account
+- `POST /login` - Authenticates user credentials
+- `POST /verify-otp` - Verifies OTP and returns JWT
+- `PUT /refresh-token` - Returns a new access token
+
+### Joke
+
+- `GET /joke` - Returns a funny joke
+
+### User
+
+- `GET /user` - Returns logged-in user's account details
+- `DELETE /user` - Deletes a user account
+
+## Authentication Flow
+
+1. Sign up with email and password
+2. Receive OTP via email
+3. Verify OTP for sign-up
+4. Login with email and password
+5. Receive OTP via email
+6. Verify OTP for login
+7. Use the received access token for authenticated requests
+8. Use the refresh token to get a new access token when needed
+
 ## Contributing
 
 1. Fork the repository
