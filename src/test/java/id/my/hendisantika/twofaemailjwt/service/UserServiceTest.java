@@ -427,4 +427,20 @@ public class UserServiceTest {
         Map<String, String> responseBody = (Map<String, String>) response.getBody();
         assertTrue(responseBody.containsKey("message"));
     }
+
+    @Test
+    void getDetails_ShouldReturnUserDetails() {
+        // Arrange
+        when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
+
+        // Act
+        ResponseEntity<?> response = userService.getDetails(testUserId);
+
+        // Assert
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertInstanceOf(Map.class, response.getBody());
+        Map<String, String> responseBody = (Map<String, String>) response.getBody();
+        assertEquals(TEST_EMAIL, responseBody.get("email_id"));
+        assertNotNull(responseBody.get("created_at"));
+    }
 }
