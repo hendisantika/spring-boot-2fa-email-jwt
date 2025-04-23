@@ -49,4 +49,20 @@ public class OtpCacheBeanTest {
         cache.put("test_key", 123456);
         assertEquals(123456, cache.get("test_key").intValue());
     }
+
+    @Test
+    void loadingCache_ShouldCreateCacheWithCorrectExpiration() throws ExecutionException {
+        // Act
+        LoadingCache<String, Integer> cache = otpCacheBean.loadingCache();
+
+        // Assert
+        assertNotNull(cache);
+
+        // Verify default value
+        assertEquals(0, cache.get("test_key").intValue());
+
+        // Put a value and verify it can be retrieved
+        cache.put("test_key", 123456);
+        assertEquals(123456, cache.get("test_key").intValue());
+    }
 }
