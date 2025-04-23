@@ -206,4 +206,27 @@ public class UserServiceTest {
         verify(oneTimePasswordCache, never()).put(anyString(), anyInt());
         verify(emailService, never()).sendEmail(anyString(), anyString(), anyString());
     }
+
+    @Test
+    void login_WhenAccountIsNotActive_ShouldThrowException() {
+        // Arrange
+        LoginRequestDto requestDto = LoginRequestDto.builder()
+                .emailId(TEST_EMAIL)
+                .password(TEST_PASSWORD)
+                .build();
+
+        testUser.setActive(false);
+        when(userRepository.findByEmailId(TEST_EMAIL)).thenReturn(Optional.of(testUser));
+        when(passwordEncoder.matches(TEST_PASSWORD, testUser.getPassword())).thenReturn(true);
+
+        // Act & Assert
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+                () -> userService.login(requestDto));
+        assertEquals(HttpStatus.UNAUTHORIZED, exception.getStatusCode());
+        assertTrue(exception.getReason().contains("Account not active"));
+
+        verify(oneTimePasswordCache, never()).invalidate(anyString());
+        verify(oneTimePasswordCache, never()).put(anyString(), anyInt());
+        verify(emailService, never()).sendEmail(anyString(), anyString(), anyString());
+    }
 }
