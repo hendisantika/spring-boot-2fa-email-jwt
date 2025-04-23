@@ -10,6 +10,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
@@ -23,6 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -131,5 +133,19 @@ public class JwtUtilsTest {
 
         // Assert
         assertTrue(isExpired);
+    }
+
+    @Test
+    void validateToken_ShouldReturnTrueForValidToken() {
+        // Arrange
+        String token = jwtUtils.generateAccessToken(testUser);
+        UserDetails userDetails = mock(UserDetails.class);
+        when(userDetails.getUsername()).thenReturn(TEST_EMAIL);
+
+        // Act
+        boolean isValid = jwtUtils.validateToken(token, userDetails);
+
+        // Assert
+        assertTrue(isValid);
     }
 }
