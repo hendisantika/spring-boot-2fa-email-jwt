@@ -95,4 +95,16 @@ public class JwtUtilsTest {
         // Assert
         assertEquals(testUser.getId(), userId);
     }
+
+    @Test
+    void isTokenExpired_ShouldReturnFalseForValidToken() {
+        // Arrange
+        String token = jwtUtils.generateAccessToken(testUser);
+
+        // Act
+        boolean isExpired = jwtUtils.isTokenExpired(token);
+
+        // Assert
+        assertFalse(isExpired);
+    }
 }
