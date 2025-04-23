@@ -66,4 +66,18 @@ public class EmailServiceTest {
         verify(javaMailSender, times(1)).send(any(SimpleMailMessage.class));
     }
 
+    @Test
+    void sendEmail_WithEmptyValues_ShouldSendEmailWithEmptyFields() {
+        // Act
+        emailService.sendEmail("", "", "");
+
+        // Assert
+        verify(javaMailSender, times(1)).send(mailMessageCaptor.capture());
+
+        SimpleMailMessage capturedMessage = mailMessageCaptor.getValue();
+        assertEquals(SENDER_EMAIL, capturedMessage.getFrom());
+        assertEquals("", capturedMessage.getTo()[0]);
+        assertEquals("", capturedMessage.getSubject());
+        assertEquals("", capturedMessage.getText());
+    }
 }
