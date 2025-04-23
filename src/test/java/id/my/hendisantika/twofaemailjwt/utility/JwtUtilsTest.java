@@ -148,4 +148,18 @@ public class JwtUtilsTest {
         // Assert
         assertTrue(isValid);
     }
+
+    @Test
+    void validateToken_ShouldReturnFalseForInvalidUsername() {
+        // Arrange
+        String token = jwtUtils.generateAccessToken(testUser);
+        UserDetails userDetails = mock(UserDetails.class);
+        when(userDetails.getUsername()).thenReturn("wrong@example.com");
+
+        // Act
+        boolean isValid = jwtUtils.validateToken(token, userDetails);
+
+        // Assert
+        assertFalse(isValid);
+    }
 }
