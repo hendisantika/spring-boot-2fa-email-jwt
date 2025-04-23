@@ -60,4 +60,15 @@ public class JwtUtilsTest {
         assertEquals(testUser.getId().toString(), jwtUtils.extractClaim(token, claims -> claims.get("user_id").toString()));
         assertFalse(jwtUtils.isTokenExpired(token));
     }
+
+    @Test
+    void generateRefreshToken_ShouldCreateValidToken() {
+        // Act
+        String token = jwtUtils.generateRefreshToken(testUser);
+
+        // Assert
+        assertNotNull(token);
+        assertEquals(TEST_EMAIL, jwtUtils.extractEmail(token));
+        assertFalse(jwtUtils.isTokenExpired(token));
+    }
 }
