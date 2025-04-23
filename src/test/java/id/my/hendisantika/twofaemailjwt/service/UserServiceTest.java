@@ -391,4 +391,21 @@ public class UserServiceTest {
         assertEquals(HttpStatus.UNAUTHORIZED, exception.getStatusCode());
         assertTrue(exception.getReason().contains("Refresh token has expired"));
     }
+
+    @Test
+    void refreshToken_WhenUserDoesNotExist_ShouldThrowException() {
+        // Arrange
+        TokenRefreshRequestDto requestDto = TokenRefreshRequestDto.builder()
+                .refreshToken(TEST_REFRESH_TOKEN)
+                .build();
+
+        when(jwtUtils.isTokenExpired(TEST_REFRESH_TOKEN)).thenReturn(false);
+        when(jwtUtils.extractEmail(TEST_REFRESH_TOKEN)).thenReturn(TEST_EMAIL);
+        when(userRepository.findByEmailId(TEST_EMAIL)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+                () -> userService.refreshToken(requestDto));
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
+    }
 }
