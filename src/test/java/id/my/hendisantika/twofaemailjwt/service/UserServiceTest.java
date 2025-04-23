@@ -333,4 +333,22 @@ public class UserServiceTest {
         assertEquals(HttpStatus.UNAUTHORIZED, exception.getStatusCode());
         assertTrue(exception.getReason().contains("Invalid email-id"));
     }
+
+    @Test
+    void verifyOtp_WhenOtpIsInvalid_ShouldThrowException() throws ExecutionException {
+        // Arrange
+        OtpVerificationRequestDto requestDto = OtpVerificationRequestDto.builder()
+                .emailId(TEST_EMAIL)
+                .oneTimePassword(TEST_OTP)
+                .context(OtpContext.LOGIN)
+                .build();
+
+        when(userRepository.findByEmailId(TEST_EMAIL)).thenReturn(Optional.of(testUser));
+        when(oneTimePasswordCache.get(TEST_EMAIL)).thenReturn(999999); // Different OTP
+
+        // Act & Assert
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+                () -> userService.verifyOtp(requestDto));
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
+    }
 }
