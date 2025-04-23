@@ -5,6 +5,7 @@ import id.my.hendisantika.twofaemailjwt.entity.User;
 import id.my.hendisantika.twofaemailjwt.mail.EmailService;
 import id.my.hendisantika.twofaemailjwt.repository.UserRepository;
 import id.my.hendisantika.twofaemailjwt.utility.JwtUtils;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -13,6 +14,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.UUID;
 
 @ExtendWith(MockitoExtension.class)
@@ -48,5 +51,15 @@ public class UserServiceTest {
     private User testUser;
     private UUID testUserId;
 
-
+    @BeforeEach
+    void setUp() {
+        testUserId = UUID.randomUUID();
+        testUser = new User();
+        testUser.setId(testUserId);
+        testUser.setEmailId(TEST_EMAIL);
+        testUser.setPassword("encoded_password");
+        testUser.setEmailVerified(true);
+        testUser.setActive(true);
+        testUser.setCreatedAt(LocalDateTime.now(ZoneId.of("+07:00")));
+    }
 }
