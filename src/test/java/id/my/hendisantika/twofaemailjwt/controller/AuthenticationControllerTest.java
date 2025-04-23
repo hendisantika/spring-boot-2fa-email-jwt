@@ -1,5 +1,6 @@
 package id.my.hendisantika.twofaemailjwt.controller;
 
+import id.my.hendisantika.twofaemailjwt.dto.LoginRequestDto;
 import id.my.hendisantika.twofaemailjwt.dto.SignupRequestDto;
 import id.my.hendisantika.twofaemailjwt.service.UserService;
 import org.junit.jupiter.api.Test;
@@ -48,6 +49,30 @@ public class AuthenticationControllerTest {
 
         // Assert
         verify(userService).createAccount(requestDto);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertSame(expectedResponse.getBody(), response.getBody());
+    }
+
+    @Test
+    void userLoginHandler_ShouldDelegateToUserService() {
+        // Arrange
+        LoginRequestDto requestDto = LoginRequestDto.builder()
+                .emailId("test@example.com")
+                .password("password")
+                .build();
+
+        Map<String, String> responseBody = new HashMap<>();
+        responseBody.put("message", "OTP sent successfully");
+        ResponseEntity<Map<String, String>> expectedResponse = ResponseEntity.ok(responseBody);
+
+        // Use unchecked cast to avoid type inference issues
+        when(userService.login(any(LoginRequestDto.class))).thenReturn((ResponseEntity) expectedResponse);
+
+        // Act
+        ResponseEntity<?> response = authenticationController.userLoginHandler(requestDto);
+
+        // Assert
+        verify(userService).login(requestDto);
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertSame(expectedResponse.getBody(), response.getBody());
     }
