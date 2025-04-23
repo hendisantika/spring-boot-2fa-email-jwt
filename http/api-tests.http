@@ -1,0 +1,69 @@
+### Sign Up
+POST http://localhost:8080/sign-up
+Content-Type: application/json
+
+{
+  "emailId": "test@example.com",
+  "password": "password123"
+}
+
+### Login
+POST http://localhost:8080/login
+Content-Type: application/json
+
+{
+  "emailId": "test@example.com",
+  "password": "password123"
+}
+
+### Verify OTP for Sign Up
+POST http://localhost:8080/verify-otp
+Content-Type: application/json
+
+{
+  "emailId": "test@example.com",
+  "oneTimePassword": 123456,
+  "context": "SIGN_UP"
+}
+
+### Verify OTP for Login
+POST http://localhost:8080/verify-otp
+Content-Type: application/json
+
+{
+  "emailId": "test@example.com",
+  "oneTimePassword": 123456,
+  "context": "LOGIN"
+}
+
+### Refresh Token
+PUT http://localhost:8080/refresh-token
+Content-Type: application/json
+
+{
+  "refreshToken": "your-refresh-token-here"
+}
+
+### Get Joke
+GET http://localhost:8080/joke
+Accept: application/json
+
+### Get User Details
+GET http://localhost:8080/user
+Authorization: Bearer your-access-token-here
+Accept: application/json
+
+### Delete User Account
+DELETE http://localhost:8080/user
+Authorization: Bearer your-access-token-here
+Accept: application/json
+
+### Verify OTP for Account Deletion
+POST http://localhost:8080/verify-otp
+Content-Type: application/json
+
+{
+  "emailId": "test@example.com",
+  "oneTimePassword": 123456,
+  "context": "ACCOUNT_DELETION"
+}
