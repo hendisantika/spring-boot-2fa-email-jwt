@@ -58,4 +58,13 @@ public class UserRepositoryTest {
         assertTrue(foundUser.isPresent());
         assertEquals("test@example.com", foundUser.get().getEmailId());
     }
+
+    @Test
+    void findByEmailId_WhenUserDoesNotExist_ShouldReturnEmptyOptional() {
+        // Act
+        Optional<User> foundUser = userRepository.findByEmailId("nonexistent@example.com");
+
+        // Assert
+        assertFalse(foundUser.isPresent());
+    }
 }
