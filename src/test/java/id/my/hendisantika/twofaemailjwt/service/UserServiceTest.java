@@ -6,6 +6,7 @@ import id.my.hendisantika.twofaemailjwt.dto.LoginRequestDto;
 import id.my.hendisantika.twofaemailjwt.dto.LoginSuccessDto;
 import id.my.hendisantika.twofaemailjwt.dto.OtpVerificationRequestDto;
 import id.my.hendisantika.twofaemailjwt.dto.SignupRequestDto;
+import id.my.hendisantika.twofaemailjwt.dto.TokenRefreshRequestDto;
 import id.my.hendisantika.twofaemailjwt.entity.User;
 import id.my.hendisantika.twofaemailjwt.mail.EmailService;
 import id.my.hendisantika.twofaemailjwt.repository.UserRepository;
@@ -350,5 +351,28 @@ public class UserServiceTest {
         ResponseStatusException exception = assertThrows(ResponseStatusException.class,
                 () -> userService.verifyOtp(requestDto));
         assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
+    }
+
+    @Test
+    void refreshToken_WhenTokenIsValid_ShouldReturnNewAccessToken() {
+        // Arrange
+        TokenRefreshRequestDto requestDto = TokenRefreshRequestDto.builder()
+                .refreshToken(TEST_REFRESH_TOKEN)
+                .build();
+
+        when(jwtUtils.isTokenExpired(TEST_REFRESH_TOKEN)).thenReturn(false);
+        when(jwtUtils.extractEmail(TEST_REFRESH_TOKEN)).thenReturn(TEST_EMAIL);
+        when(userRepository.findByEmailId(TEST_EMAIL)).thenReturn(Optional.of(testUser));
+        when(jwtUtils.generateAccessToken(testUser)).thenReturn(TEST_ACCESS_TOKEN);
+
+        // Act
+        ResponseEntity<?> response = userService.refreshToken(requestDto);
+
+        // Assert
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertInstanceOf(LoginSuccessDto.class, response.getBody());
+        LoginSuccessDto responseBody = (LoginSuccessDto) response.getBody();
+        assertEquals(TEST_ACCESS_TOKEN, responseBody.getAccessToken());
+        assertEquals(TEST_REFRESH_TOKEN, responseBody.getRefreshToken());
     }
 }
