@@ -162,4 +162,25 @@ public class JwtUtilsTest {
         // Assert
         assertFalse(isValid);
     }
+
+    @Test
+    void validateToken_ShouldReturnFalseForExpiredToken() {
+        // Arrange
+        SecretKey key = Keys.hmacShaKeyFor(SECRET_KEY.getBytes(StandardCharsets.UTF_8));
+        String token = Jwts.builder()
+                .setSubject(TEST_EMAIL)
+                .setIssuedAt(new Date(System.currentTimeMillis() - TimeUnit.HOURS.toMillis(2)))
+                .setExpiration(new Date(System.currentTimeMillis() - TimeUnit.HOURS.toMillis(1)))
+                .signWith(key)
+                .compact();
+
+        UserDetails userDetails = mock(UserDetails.class);
+        when(userDetails.getUsername()).thenReturn(TEST_EMAIL);
+
+        // Act
+        boolean isValid = jwtUtils.validateToken(token, userDetails);
+
+        // Assert
+        assertFalse(isValid);
+    }
 }
