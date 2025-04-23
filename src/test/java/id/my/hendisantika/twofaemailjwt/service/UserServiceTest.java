@@ -17,6 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -26,11 +27,13 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -110,5 +113,27 @@ public class UserServiceTest {
         assertInstanceOf(Map.class, response.getBody());
         Map<String, String> responseBody = (Map<String, String>) response.getBody();
         assertTrue(responseBody.containsKey("message"));
+    }
+
+    @Test
+    void createAccount_WhenEmailExists_ShouldThrowException() {
+        // Arrange
+        SignupRequestDto requestDto = SignupRequestDto.builder()
+                .emailId(TEST_EMAIL)
+                .password(TEST_PASSWORD)
+                .build();
+
+        when(userRepository.existsByEmailId(TEST_EMAIL)).thenReturn(true);
+
+        // Act & Assert
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+                () -> userService.createAccount(requestDto));
+        assertEquals(HttpStatus.CONFLICT, exception.getStatusCode());
+        assertTrue(exception.getReason().contains("User account already exists"));
+
+        verify(userRepository, never()).save(any(User.class));
+        verify(oneTimePasswordCache, never()).invalidate(anyString());
+        verify(oneTimePasswordCache, never()).put(anyString(), anyInt());
+        verify(emailService, never()).sendEmail(anyString(), anyString(), anyString());
     }
 }
