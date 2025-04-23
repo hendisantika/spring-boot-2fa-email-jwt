@@ -408,4 +408,23 @@ public class UserServiceTest {
                 () -> userService.refreshToken(requestDto));
         assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
     }
+
+    @Test
+    void deleteAccount_ShouldSendOtp() {
+        // Arrange
+        when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
+
+        // Act
+        ResponseEntity<?> response = userService.deleteAccount(testUserId);
+
+        // Assert
+        verify(oneTimePasswordCache).invalidate(TEST_EMAIL);
+        verify(oneTimePasswordCache).put(eq(TEST_EMAIL), anyInt());
+        verify(emailService).sendEmail(eq(TEST_EMAIL), eq("2FA: Confirm account Deletion"), anyString());
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertInstanceOf(Map.class, response.getBody());
+        Map<String, String> responseBody = (Map<String, String>) response.getBody();
+        assertTrue(responseBody.containsKey("message"));
+    }
 }
