@@ -34,6 +34,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -288,5 +289,30 @@ public class UserServiceTest {
         assertNotNull(response.getBody());
         assertEquals(TEST_ACCESS_TOKEN, response.getBody().getAccessToken());
         assertEquals(TEST_REFRESH_TOKEN, response.getBody().getRefreshToken());
+    }
+
+    @Test
+    void verifyOtp_ForAccountDeletion_WhenOtpIsValid_ShouldDeactivateAccount() throws ExecutionException {
+        // Arrange
+        OtpVerificationRequestDto requestDto = OtpVerificationRequestDto.builder()
+                .emailId(TEST_EMAIL)
+                .oneTimePassword(TEST_OTP)
+                .context(OtpContext.ACCOUNT_DELETION)
+                .build();
+
+        when(userRepository.findByEmailId(TEST_EMAIL)).thenReturn(Optional.of(testUser));
+        when(oneTimePasswordCache.get(TEST_EMAIL)).thenReturn(TEST_OTP);
+        when(userRepository.save(any(User.class))).thenReturn(testUser);
+
+        // Act
+        ResponseEntity<LoginSuccessDto> response = userService.verifyOtp(requestDto);
+
+        // Assert
+        verify(userRepository).save(userCaptor.capture());
+        User savedUser = userCaptor.getValue();
+        assertFalse(savedUser.isActive());
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNull(response.getBody());
     }
 }
